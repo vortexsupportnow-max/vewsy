@@ -54,7 +54,6 @@ src/
     modifica/             editor del proprio profilo
     accedi/               login, registrazione, recupero password
     account/              email, password, metodi di accesso
-    debug/firebase/       diagnostica della connessione
   components/             interfaccia
   lib/
     firebase.ts           init SDK; `getFirebaseAuth()` è lazy di proposito
