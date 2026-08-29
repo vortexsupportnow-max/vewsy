@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import { AvatarUploader } from "./avatar-uploader";
 import { useAuth } from "./auth-provider";
 import { PLATFORM_LABELS, PlatformIcon } from "./platform-icon";
 import { saveProfile } from "@/lib/profiles";
@@ -76,6 +77,14 @@ function ProfileForm({ uid, profile }: { uid: string; profile: Profile }) {
 
   return (
     <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-6">
+      <AvatarUploader
+        uid={uid}
+        avatarUrl={form.avatarUrl}
+        displayName={form.displayName}
+        username={form.username}
+        onChange={(avatarUrl) => update({ avatarUrl })}
+      />
+
       <Field label="Handle" hint={`vewsy.app/${form.username || "…"}`}>
         <input
           value={form.username}

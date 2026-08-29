@@ -30,10 +30,28 @@ service cloud.firestore {
       allow update: if false;
     }
 
-    // Collection di sola lettura usata da /debug/firebase per la diagnostica.
-    match /_healthcheck/{docId} {
-      allow read: if true;
-      allow write: if false;
+    // Contatori di visite e click. Sono l'unica collection che accetta scritture
+    // da visitatori non autenticati, quindi la forma è vincolata al massimo:
+    // si può solo creare a 1 o incrementare `views` di 1 alla volta.
+    //
+    // Limite noto: il delta della mappa `clicks` non è verificabile nelle regole
+    // (non si può sommare una mappa), quindi un attore malintenzionato potrebbe
+    // gonfiare i click. È una metrica di vanità, non un dato su cui si decide:
+    // il danno massimo è un numero sbagliato. Se un giorno conterà davvero,
+    // va spostata dietro una Cloud Function con rate limiting.
+    match /stats/{uid} {
+      // Le statistiche le vede solo il diretto interessato.
+      allow read: if request.auth != null && request.auth.uid == uid;
+
+      allow create: if request.resource.data.keys().hasOnly(['views', 'clicks'])
+                    && (!('views' in request.resource.data) || request.resource.data.views == 1);
+
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['views', 'clicks'])
+                    && request.resource.data.views >= resource.data.views
+                    && request.resource.data.views <= resource.data.views + 1;
+
+      allow delete: if request.auth != null && request.auth.uid == uid;
     }
 
     // Tutto il resto è chiuso: ogni nuova collection va aggiunta qui esplicitamente.
@@ -43,7 +61,7 @@ service cloud.firestore {
     // Generata da src/lib/reserved-usernames.ts — non modificare a mano:
     // rilancia "npm run rules:sync" dopo aver cambiato la lista.
     function usernameNotReserved() {
-      return !(request.resource.data.username in ['_next', 'about', 'accedi', 'account', 'admin', 'administrator', 'aiuto', 'api', 'cerca', 'chi-siamo', 'contatti', 'debug', 'esplora', 'explore', 'favicon', 'help', 'impostazioni', 'info', 'legal', 'login', 'logout', 'me', 'modifica', 'new', 'null', 'nuovo', 'privacy', 'profile', 'profilo', 'register', 'registrati', 'robots', 'search', 'settings', 'signin', 'signup', 'sitemap', 'staff', 'static', 'support', 'supporto', 'termini', 'terms', 'undefined', 'user', 'utente', 'vewsy']);
+      return !(request.resource.data.username in ['_next', 'about', 'accedi', 'account', 'admin', 'administrator', 'aiuto', 'api', 'benvenuto', 'cerca', 'chi-siamo', 'contatti', 'debug', 'esplora', 'explore', 'favicon', 'help', 'impostazioni', 'info', 'legal', 'login', 'logout', 'me', 'modifica', 'new', 'null', 'nuovo', 'privacy', 'profile', 'profilo', 'register', 'registrati', 'robots', 'search', 'settings', 'signin', 'signup', 'sitemap', 'staff', 'static', 'statistiche', 'support', 'supporto', 'termini', 'terms', 'undefined', 'user', 'utente', 'vewsy']);
     }
 
     function isOwner(uid) {

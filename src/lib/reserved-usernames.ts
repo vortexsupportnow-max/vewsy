@@ -7,7 +7,16 @@
  * registro. Ogni volta che aggiungi una pagina di primo livello, il suo nome
  * va aggiunto qui E in firestore.rules.
  */
-const ROUTES = ["modifica", "debug", "accedi", "account", "registrati", "api"];
+const ROUTES = [
+  "modifica",
+  "debug",
+  "accedi",
+  "account",
+  "registrati",
+  "api",
+  "benvenuto",
+  "statistiche",
+];
 
 /** Nomi che non vuoi far impersonare, o che ti servirai in futuro. */
 const RISERVATI = [

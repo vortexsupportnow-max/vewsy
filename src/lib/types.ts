@@ -66,6 +66,8 @@ export type Profile = {
   /** Prefissi generati da username, displayName e tags per la ricerca testuale. */
   searchTokens: string[];
   verified: boolean;
+  /** Null finché il primo accesso guidato non è stato completato. */
+  onboardedAt: Timestamp | null;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 };

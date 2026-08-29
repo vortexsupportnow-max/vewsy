@@ -18,6 +18,7 @@ function mock(
     platforms: [],
     searchTokens: [],
     verified: false,
+    onboardedAt: null,
     createdAt: null,
     updatedAt: null,
     ...partial,

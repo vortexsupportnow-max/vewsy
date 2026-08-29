@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { Avatar } from "@/components/avatar";
-import { PLATFORM_LABELS, PlatformIcon } from "@/components/platform-icon";
+import { ProfileLinks } from "@/components/profile-links";
 import { SiteHeader } from "@/components/site-header";
 import { getProfileByUsername } from "@/lib/profiles";
 
@@ -56,31 +56,7 @@ export default async function ProfilePage({ params }: PageProps<"/[username]">) 
         </div>
 
         <div className="mt-10 flex flex-col gap-3">
-          {profile.links.length === 0 && (
-            <p className="hairline rounded-2xl px-5 py-8 text-center text-sm text-muted">
-              Questo profilo non ha ancora link.
-            </p>
-          )}
-
-          {profile.links.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer me"
-              className="hairline flex items-center gap-4 rounded-2xl bg-surface px-5 py-4 transition-colors hover:border-accent/40"
-            >
-              <span className="text-accent">
-                <PlatformIcon platform={link.platform} />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium">
-                  {link.label || PLATFORM_LABELS[link.platform]}
-                </span>
-                <span className="block truncate text-sm text-muted">{link.url}</span>
-              </span>
-            </a>
-          ))}
+          <ProfileLinks uid={profile.uid} links={profile.links} />
         </div>
       </main>
     </>

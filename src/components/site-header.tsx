@@ -28,6 +28,12 @@ export function SiteHeader() {
               Modifica
             </Link>
             <Link
+              href="/statistiche"
+              className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:text-text"
+            >
+              Statistiche
+            </Link>
+            <Link
               href="/account"
               className="rounded-full px-3 py-2 text-sm text-muted transition-colors hover:text-text"
             >

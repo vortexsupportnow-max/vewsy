@@ -36,7 +36,13 @@ const generated = `
       return !(request.resource.data.username in [${names.map((n) => `'${n}'`).join(", ")}]);
     }`;
 
-const rules = readFileSync(rulesPath, "utf8");
+const raw = readFileSync(rulesPath, "utf8");
+
+// Su Windows git riscrive il file in CRLF: confrontare senza normalizzare
+// farebbe fallire --check a ogni esecuzione, con le due liste identiche.
+const usesCrlf = raw.includes("\r\n");
+const rules = raw.replace(/\r\n/g, "\n");
+
 const marker = /\n\s*\/\/ Generata da src\/lib\/reserved-usernames\.ts[\s\S]*?function usernameNotReserved\(\) \{[\s\S]*?\n    \}/;
 
 if (!marker.test(rules)) {
@@ -52,6 +58,6 @@ if (process.argv.includes("--check")) {
   }
   console.log(`firestore.rules allineato (${names.length} handle riservati).`);
 } else {
-  writeFileSync(rulesPath, next);
+  writeFileSync(rulesPath, usesCrlf ? next.replace(/\n/g, "\r\n") : next);
   console.log(`firestore.rules aggiornato con ${names.length} handle riservati.`);
 }

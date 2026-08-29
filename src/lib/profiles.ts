@@ -109,7 +109,11 @@ export async function isUsernameAvailable(username: string): Promise<boolean> {
  * in modo atomico: se qualcuno l'ha preso un istante prima, la transazione fallisce
  * invece di lasciare due profili con lo stesso handle.
  */
-export async function saveProfile(uid: string, input: ProfileInput): Promise<void> {
+export async function saveProfile(
+  uid: string,
+  input: ProfileInput,
+  options: { markOnboarded?: boolean } = {},
+): Promise<void> {
   const username = normalize(input.username).replace(/\s/g, "");
   if (username.length < 3) throw new Error("L'username deve avere almeno 3 caratteri.");
   if (username.length > 30) throw new Error("L'username non può superare i 30 caratteri.");
@@ -156,6 +160,11 @@ export async function saveProfile(uid: string, input: ProfileInput): Promise<voi
         platforms: [...new Set(links.map((l) => l.platform))],
         searchTokens: buildSearchTokens(username, input.displayName, tags),
         verified: existingProfile.data()?.verified ?? false,
+        // `merge` conserverebbe il valore precedente, ma scriverlo esplicitamente
+        // rende ovvio che solo il wizard può segnare il profilo come completato.
+        onboardedAt: options.markOnboarded
+          ? serverTimestamp()
+          : (existingProfile.data()?.onboardedAt ?? null),
         createdAt: existingProfile.data()?.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),
       },

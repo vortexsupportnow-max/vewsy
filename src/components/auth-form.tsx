@@ -42,10 +42,10 @@ export function AuthForm() {
         setNotice(`Se esiste un account per ${email}, il link di recupero è partito.`);
       } else if (mode === "registrati") {
         await signUpWithEmail(email, password, displayName);
-        router.push("/modifica");
+        router.push("/benvenuto");
       } else {
         await signInWithEmail(email, password);
-        router.push("/modifica");
+        router.push("/benvenuto");
       }
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : String(e));
@@ -69,7 +69,7 @@ export function AuthForm() {
 
       {mode !== "recupera" && (
         <>
-          <GoogleButton onDone={() => router.push("/modifica")} />
+          <GoogleButton onDone={() => router.push("/benvenuto")} />
           <div className="flex items-center gap-3 text-xs text-muted">
             <span className="h-px flex-1 bg-muted/20" />
             oppure

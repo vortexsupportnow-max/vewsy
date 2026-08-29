@@ -54,9 +54,13 @@ src/
     modifica/             editor del proprio profilo
     accedi/               login, registrazione, recupero password
     account/              email, password, metodi di accesso
+    benvenuto/            primo accesso guidato in tre passi
+    statistiche/          visite e click, visibili solo al proprietario
   components/             interfaccia
   lib/
     firebase.ts           init SDK; `getFirebaseAuth()` è lazy di proposito
+    storage.ts            upload avatar, ridimensionato nel browser
+    stats.ts              contatori di visite e click
     auth.ts               accesso, verifica email, cambio credenziali, linking
     profiles.ts           lettura, ricerca e scrittura dei profili
     search-tokens.ts      indicizzazione a prefissi per la ricerca
@@ -65,13 +69,27 @@ src/
 
 ## Firestore
 
-Due collection:
+Tre collection:
 
 - **`profiles`** — un documento per utente, id = uid. Pubblicamente leggibile,
   scrivibile solo dal proprietario.
 - **`usernames`** — un documento per handle, id = username. Garantisce
   l'unicità: viene scritto nella stessa transazione del profilo, così due
   persone non possono prendersi lo stesso handle.
+- **`stats`** — contatori di visite e click, id = uid. Leggibile solo dal
+  proprietario, ma **scrivibile da chiunque**: è l'unico punto in cui un
+  visitatore non autenticato scrive. Le regole limitano `views` a +1 per
+  scrittura; il delta della mappa `clicks` non è verificabile nelle regole
+  (non si può sommare una mappa), quindi è gonfiabile. È una metrica di
+  vanità: se un giorno conterà davvero, va dietro una Cloud Function.
+
+### Storage
+
+Gli avatar stanno in `avatars/{uid}`, pubblici in lettura e scrivibili solo
+dal proprietario. Il ridimensionamento a 512px WebP avviene **nel browser**
+prima del caricamento: le regole rifiutano qualsiasi cosa non sia WebP sotto
+i 2MB. Le regole stanno in `storage.rules`, pubblicate con
+`firebase deploy --only storage`.
 
 ### Ricerca
 
