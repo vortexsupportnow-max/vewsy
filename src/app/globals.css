@@ -1,26 +1,45 @@
 @import "tailwindcss";
 
+/*
+ * Palette Vewsy — dark-only per scelta di prodotto.
+ * Sono gli unici cinque colori dell'interfaccia: qualsiasi altra tinta va
+ * ottenuta con l'opacità di questi, non aggiungendo nuovi valori.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --vw-bg: #0d0d0f;
+  --vw-surface: #19191c;
+  --vw-accent: #caa07d;
+  --vw-text: #f7ece6;
+  --vw-muted: #b9a99b;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--vw-bg);
+  --color-surface: var(--vw-surface);
+  --color-accent: var(--vw-accent);
+  --color-text: var(--vw-text);
+  --color-muted: var(--vw-muted);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--vw-bg);
+  color: var(--vw-text);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Il bordo sottile è l'unico separatore usato: niente ombre, niente gradienti. */
+@utility hairline {
+  border: 1px solid color-mix(in oklab, var(--vw-muted) 14%, transparent);
+}
+
+::selection {
+  background: color-mix(in oklab, var(--vw-accent) 35%, transparent);
+  color: var(--vw-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--vw-accent);
+  outline-offset: 2px;
 }

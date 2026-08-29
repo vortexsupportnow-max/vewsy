@@ -6,9 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "rules:sync": "node scripts/sync-reserved-usernames.mjs",
+    "rules:check": "node scripts/sync-reserved-usernames.mjs --check"
   },
   "dependencies": {
+    "firebase": "^12.18.0",
     "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"

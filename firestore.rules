@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // I profili sono pubblici (è il senso dell'app), ma li scrive solo il proprietario.
+    match /profiles/{uid} {
+      allow read: if true;
+
+      allow create: if isOwner(uid)
+                    && validProfile()
+                    && usernameNotReserved()
+                    // Il badge lo assegna solo un admin dalla console.
+                    && request.resource.data.verified == false;
+
+      allow update: if isOwner(uid)
+                    && validProfile()
+                    && usernameNotReserved()
+                    && request.resource.data.verified == resource.data.verified;
+
+      allow delete: if isOwner(uid);
+    }
+
+    // Registro degli username: leggibile per il controllo di disponibilità,
+    // scrivibile solo dall'utente che rivendica l'handle.
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // Collection di sola lettura usata da /debug/firebase per la diagnostica.
+    match /_healthcheck/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Tutto il resto è chiuso: ogni nuova collection va aggiunta qui esplicitamente.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    // Generata da src/lib/reserved-usernames.ts — non modificare a mano:
+    // rilancia "npm run rules:sync" dopo aver cambiato la lista.
+    function usernameNotReserved() {
+      return !(request.resource.data.username in ['_next', 'about', 'accedi', 'account', 'admin', 'administrator', 'aiuto', 'api', 'cerca', 'chi-siamo', 'contatti', 'debug', 'esplora', 'explore', 'favicon', 'help', 'impostazioni', 'info', 'legal', 'login', 'logout', 'me', 'modifica', 'new', 'null', 'nuovo', 'privacy', 'profile', 'profilo', 'register', 'registrati', 'robots', 'search', 'settings', 'signin', 'signup', 'sitemap', 'staff', 'static', 'support', 'supporto', 'termini', 'terms', 'undefined', 'user', 'utente', 'vewsy']);
+    }
+
+    function isOwner(uid) {
+      return request.auth != null
+             && request.auth.uid == uid
+             && request.resource.data.uid == uid;
+    }
+
+    // Le stesse regole che applica il client, riaffermate lato server: il client
+    // è modificabile da chiunque, quindi i limiti veri stanno solo qui.
+    function validProfile() {
+      let data = request.resource.data;
+      return data.username is string
+             && data.username.size() >= 3
+             && data.username.size() <= 30
+             && data.bio is string
+             && data.bio.size() <= 150
+             && data.tags is list
+             && data.tags.size() <= 15
+             && data.links is list
+             && data.links.size() <= 50;
+    }
+  }
+}
